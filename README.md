@@ -1,1 +1,1 @@
-# spluk-learning
+# splunk-learning
