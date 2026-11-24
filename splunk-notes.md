@@ -1,19 +1,19 @@
 # Splunk: combined notes
 ## 1. Architecture and data pipeline
 
-![Splunk architecture](images/arch.png)
+![Splunk architecture](arch.png)
 
-**Forwarders** collect data on the source machines. A **universal forwarder (UF)** is a small agent that does minimal processing. A **heavy forwarder (HF)** is a full Splunk instance that can parse, filter, mask and route before forwarding. Both tag data with `host`, `source` and `sourcetype` before sending. **[checked]**
+**Forwarders** collect data on the source machines. A **universal forwarder (UF)** is a small agent that does minimal processing. A **heavy forwarder (HF)** is a full Splunk instance that can parse[...]
 
-**Indexers** turn the stream into searchable events and store them in **buckets**: compressed raw data plus `.tsidx` index files. In a cluster, indexers replicate each other's buckets so losing one does not lose data. In a distributed setup they also act as **search peers**.
+**Indexers** turn the stream into searchable events and store them in **buckets**: compressed raw data plus `.tsidx` index files. In a cluster, indexers replicate each other's buckets so losing one do[...]
 
-**Search heads** serve Splunk Web, the REST API and the CLI. They send the search to every indexer in parallel and merge the results. They also hold your **knowledge objects** (reports, dashboards, event types, extractions).
+**Search heads** serve Splunk Web, the REST API and the CLI. They send the search to every indexer in parallel and merge the results. They also hold your **knowledge objects** (reports, dashboards, ev...
 
 **Deployment server** distributes apps and configuration to forwarders (deployment clients). **[course]**
 
-**Why this design.** Separating collection, storage and search lets each scale on its own. Thousands of endpoints get cheap forwarders. Storage grows by adding indexers. Analysts get more concurrency by adding search heads. In your single-VM lab all three roles live on one instance.
+**Why this design.** Separating collection, storage and search lets each scale on its own. Thousands of endpoints get cheap forwarders. Storage grows by adding indexers. Analysts get more concurrency [...]
 
-![Data pipeline](images/pipeline.png)
+![Data pipeline](pipeline.png)
 
 | Stage | What happens | Who can do it **[checked]** |
 |---|---|---|
@@ -31,13 +31,13 @@
 
 ## 2. Splunk Web, apps and add-ons (Lesson 2)
 
-**Layout.** The Splunk bar holds the app switcher, Messages, Settings, Activity (jobs, triggered alerts) and Help. The home page lists installed apps on the left. Search & Reporting is where you write SPL, set time ranges, inspect fields and save reports, dashboards and alerts. **[course]**
+**Layout.** The Splunk bar holds the app switcher, Messages, Settings, Activity (jobs, triggered alerts) and Help. The home page lists installed apps on the left. Search & Reporting is where you write...
 
-**Apps vs add-ons.** An **app** has a user interface, dashboards and workflows. A **technology add-on (TA)** works behind the scenes: data collection, parsing, field extraction, and mapping to the Common Information Model (CIM). Rule of thumb: apps are for people, add-ons are for data. **[course]**
+**Apps vs add-ons.** An **app** has a user interface, dashboards and workflows. A **technology add-on (TA)** works behind the scenes: data collection, parsing, field extraction, and mapping to the Com...
 
-**App context matters.** Saved searches, dashboards and knowledge objects belong to the app that is active when you create them. If an object "disappeared", you are probably in a different app. Check the app switcher first.
+**App context matters.** Saved searches, dashboards and knowledge objects belong to the app that is active when you create them. If an object "disappeared", you are probably in a different app. Check ...
 
-**Your Qualys link.** The Splunkbase app you cited (Qualys Vulnerability Management, app 6565) is a **Splunk SOAR connector**, not something that ingests Qualys data into Splunk Enterprise. Its five actions are test connectivity, list asset groups, list host findings, launch scan and scan summary. **[course]** Separate from that, a Qualys technology add-on exists for pulling Qualys data into Splunk Enterprise **[verify]**. For interviews, the distinction is the point: SOAR connector = automate actions; TA = ingest data. Be aware you need Qualys API access for either, and your licence is gone, so treat this as a concept topic.
+**Your Qualys link.** The Splunkbase app you cited (Qualys Vulnerability Management, app 6565) is a **Splunk SOAR connector**, not something that ingests Qualys data into Splunk Enterprise. Its five a...
 
 **Jobs and roles.** Activity > Jobs lets you inspect, pause or extend search jobs. What you see under Settings depends on your role.
 
@@ -54,11 +54,11 @@ Combine keywords, quoted phrases and wildcards. **Operator order is NOT, then OR
 Default fields: `host`, `source`, `sourcetype`, `index`, `_time`. Filter with `=`, `!=`, `IN (...)` or numeric comparisons.
 
 ### Pipes and transforming commands
-The pipe passes output left to right. Core commands: `fields`, `dedup`, `sort`, `table`, `stats` (count, dc, sum, values) and `timechart`. A *transforming* command turns events into a table or chart, which is why modes treat searches ending in `stats` differently.
+The pipe passes output left to right. Core commands: `fields`, `dedup`, `sort`, `table`, `stats` (count, dc, sum, values) and `timechart`. A *transforming* command turns events into a table or chart, [...]
 
 ### Search modes
 
-![Search modes](images/modes.png)
+![Search modes](modes.png)
 
 | Mode | Field discovery | Use it for |
 |---|---|---|
@@ -72,9 +72,9 @@ The pipe passes output left to right. Core commands: `fields`, `dedup`, `sort`, 
 3. Summarise with `stats` instead of reading raw events.
 
 ### Practice with Splunk's tutorial data
-Your dashboard doc ("BCG Logins") uses Splunk's **Search Tutorial data**: fictional Buttercup Games with `access.log`, `secure.log` and `vendor_sales.log`. The usernames in your chart (`djohnson`, `nsharpe`, `myuan`) match `secure.log`. Download link: on the Splunk Search Tutorial page "Upload the tutorial data". Upload it to your own lab so every example below runs on your data. **[checked: file list and sample event; the zip link is on the tutorial's next page]**
+Your dashboard doc ("BCG Logins") uses Splunk's **Search Tutorial data**: fictional Buttercup Games with `access.log`, `secure.log` and `vendor_sales.log`. The usernames in your chart (`djohnson`, [...]
 
-A `secure.log` failed login looks like this: `mailsv1 sshd[5276]: Failed password for invalid user appserver from 194.8.74.23 port 3351`. **[checked]** The examples use `rex` to extract fields, so they do not depend on how your upload named the sourcetype. Set the index to wherever you uploaded (the default is `main`). **[verify field names on your upload]**
+A `secure.log` failed login looks like this: `mailsv1 sshd[5276]: Failed password for invalid user appserver from 194.8.74.23 port 3351`. **[checked]** The examples use `rex` to extract fields, so the...
 
 **Example 1: failed logins by user (the pie chart in your notes)**
 
@@ -111,7 +111,7 @@ Replace the last two lines with `| geostats count` to feed a map panel. `iplocat
 
 ## 4. Knowledge objects
 
-Knowledge objects are **search-time** definitions that classify, normalise, enrich and interpret your data **without changing the raw events at index time**. This is the main reason you can fix a bad extraction later without re-ingesting. **[course]**
+Knowledge objects are **search-time** definitions that classify, normalise, enrich and interpret your data **without changing the raw events at index time**. This is the main reason you can fix a bad [...]
 
 | Role in your diagram | Object | Example on the tutorial data |
 |---|---|---|
@@ -121,7 +121,7 @@ Knowledge objects are **search-time** definitions that classify, normalise, enri
 | Interpretation | Field extraction, workflow action | A regex that extracts `user` and `src_ip` from `secure.log` |
 | Structure | Data model | Authentication dataset that powers pivots and accelerated reports |
 
-Your list omits **saved searches, macros and workflow actions**, which are also knowledge objects. A macro is a reusable chunk of SPL, which is useful for a detection you run in many searches. **[verify]**
+Your list omits **saved searches, macros and workflow actions**, which are also knowledge objects. A macro is a reusable chunk of SPL, which is useful for a detection you run in many searches. **[veri...
 
 **Lookup example.** Upload `asset_owners.csv` with columns `src_ip,owner,criticality`, then:
 
@@ -137,7 +137,7 @@ Your list omits **saved searches, macros and workflow actions**, which are also 
 ## 5. Reports, dashboards and drilldown
 
 ### Reports
-A report is a saved search that runs on demand or on a schedule and can feed a dashboard. To create one: run the search, then Save As > Report, enter a title and optional description, choose whether to include a time range picker, and save. Then pick Continue Editing, Add to Dashboard, Permissions or View. **[course]**
+A report is a saved search that runs on demand or on a schedule and can feed a dashboard. To create one: run the search, then Save As > Report, enter a title and optional description, choose whether t...
 
 ### Permissions
 New reports are **Private (Owner)**. Under Permissions you choose who sees them:
@@ -150,7 +150,7 @@ New reports are **Private (Owner)**. Under Permissions you choose who sees them:
 
 Then set **Read** (view and run) and **Write** (edit, change permissions, delete) per role.
 
-**Example.** An analyst saves "Failed SSH Logins by Source IP". It starts Private. Set App-level sharing with Read for `user` and Write for `power` and `admin`, so every analyst can run it but only senior roles can change it. An admin can see and manage it even before you share it. **[course]**
+**Example.** An analyst saves "Failed SSH Logins by Source IP". It starts Private. Set App-level sharing with Read for `user` and Write for `power` and `admin`, so every analyst can run it but only se...
 
 ### Dashboards
 A dashboard is a set of panels (charts, tables, single values) driven by searches or reports.
@@ -169,15 +169,15 @@ A dashboard is a set of panels (charts, tables, single values) driven by searche
 For the plan's Day 17 Endpoint Overview dashboard, apply the same method with Sysmon data, and for each panel write down the decision it supports. A panel with no decision should go.
 
 ### Drilldown
-Drilldown makes a click do something. The four actions: **link to a search** (opens a search filtered by the clicked value), **link to a dashboard** (passes tokens), **link to a URL**, and **set tokens** (filters other panels on the same dashboard). **[course]**
+Drilldown makes a click do something. The four actions: **link to a search** (opens a search filtered by the clicked value), **link to a dashboard** (passes tokens), **link to a URL**, and **set token[...
 
-*Example:* a failed-logins-by-`src_ip` table; clicking an IP opens a search filtered to that IP. The clicked value arrives as a **token**. Token names depend on the dashboard type (for example `$click.value$` in Simple XML), so check the syntax for your version. **[verify]**
+*Example:* a failed-logins-by-`src_ip` table; clicking an IP opens a search filtered to that IP. The clicked value arrives as a **token**. Token names depend on the dashboard type (for example `$click...
 
 ---
 
 ## 6. RBAC: roles and capabilities (corrected)
 
-![RBAC](images/rbac.png)
+![RBAC](rbac.png)
 
 **Core idea.** A **role** bundles capabilities, allowed and default indexes, search filters and search job limits. Users receive roles. **[course]**
 
@@ -191,13 +191,13 @@ Drilldown makes a click do something. The four actions: **link to a search** (op
 
 **`delete` does not erase data.** It hides matching events from search results; the raw data stays in the buckets. **[course]**
 
-**What happens with several roles (this is the correction):**
+**What happens with several roles (the correction):**
 - **Capabilities:** the user gets the *most permissive* combination. **[checked]**
 - **Allowed indexes:** the *most permissive* access across roles. **[checked]**
 - **Search filters:** the filters are *combined* and the restrictions of each apply. **[checked]**
 - **Search quotas:** Splunk's page does not say how these combine, so do not claim a rule.
 
-*Why it matters:* roles only ever add access. You cannot take access away by giving someone a second, more restricted role. To restrict, remove the broader role or use a search filter. This is the answer to "someone has both `power` and a restricted analyst role: what can they search?"
+*Why it matters:* roles only ever add access. You cannot take access away by giving someone a second, more restricted role. To restrict, remove the broader role or use a search filter. This is th...
 
 ---
 
