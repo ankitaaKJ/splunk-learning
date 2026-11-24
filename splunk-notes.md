@@ -1,24 +1,4 @@
 # Splunk: combined notes
-
-**Built from:** your 9 Google Docs (Intro to Splunk Lessons 2 and 3, Architecture & Data Pipeline, Search Modes, Knowledge Objects, Reports & Permissions, Dashboards & Drilldown, Dashboard Studio, RBAC) and your Day 1 install write-up. Splunk's own docs were used to check them.
-
-**Evidence tags.** **[checked]** = confirmed against Splunk's docs. **[course]** = from your course notes, not independently checked. **[verify]** = my general knowledge; confirm before relying on it in an interview.
-
----
-
-## 0. What the review found
-
-Your notes are accurate and well organised. Four points need fixing or sharpening:
-
-1. **RBAC multi-role rule is wrong in your notes.** You wrote "union of capabilities and *intersection (most restrictive)* of search/data limits". Splunk's docs say users get the **most permissive** capabilities and the **most permissive** index access, while **search filters are combined and each filter's restrictions apply**. See section 7. This is a common interview trap.
-2. **The pipeline has four stages in Splunk's docs** (input, parsing, indexing, search). Your notes group parsing and indexing under "storage", which is a valid teaching shortcut, but know the four-stage version. **[checked]**
-3. **A universal forwarder is not purely raw.** Splunk's docs say it does minimal processing and that universal forwarders parse *structured* data locally (for example CSV or JSON). "Unparsed" is right for ordinary logs, not for everything. **[checked]**
-4. **"Deployment Server / Management Console" are two different things.** The deployment server pushes apps and configuration to forwarders. The Monitoring Console watches deployment health. Splunk's pipeline page does not cover either, so treat the grouping as course shorthand. **[course]**
-
-Also: the "~1-2% CPU" figure for a universal forwarder is a course claim; I could not find it in the docs. Say "small footprint" in an interview unless you have a source. **[course]**
-
----
-
 ## 1. Architecture and data pipeline
 
 ![Splunk architecture](images/arch.png)
@@ -49,40 +29,7 @@ Also: the "~1-2% CPU" figure for a universal forwarder is a course claim; I coul
 | Indexer workload | Parses and indexes | Indexes only (data already parsed) |
 | Network | May carry noise you did not filter | Filtered at source, saves bandwidth |
 
-**Interview framing.** "When would you use a heavy forwarder?" When you need to filter, mask or route before the data leaves the site: dropping noisy events, masking sensitive values, or sending different data to different indexers.
-
----
-
-## 2. Your lab status (Day 1)
-
-You downloaded Splunk Enterprise 10.6.2.5 (.deb, about 1.5 GB), installed it with `dpkg -i`, and logged in at `http://kali:8000`.
-
-![Download page](images/01-splunk-download-page.png)
-*Splunk's download page: 500 MB/day, 60 days, then convert to a perpetual free licence.*
-
-![wget](images/02-wget-download.png)
-*`wget` of the .deb, 23 Nov 2026.*
-
-![deb file](images/03-deb-in-home-dir.png)
-*The package in your home directory.*
-
-![dpkg](images/04-dpkg-install.png)
-*`dpkg -i` finished with "complete". The `python3.7 site-packages` message did not stop the install.*
-
-![Splunk Web](images/05-splunk-web-home.png)
-*Splunk Web home, logged in as Administrator.*
-
-**Fixes to your Day 1 doc**
-- Word turned `--accept-license` and `--run-as-root` into en dashes (`–`). Pasted into a terminal they fail. Use two plain hyphens. (Observed in your doc's text.)
-- Splunk 10.2 and later does not let you run as root by default, which is why you needed `--run-as-root`. Splunk calls root operation deprecated. For a defensible setup, create a `splunk` user, give it ownership of the install directory, and start Splunk as that user. **[checked]**
-- Kali is not on Splunk's supported-OS list (Ubuntu 22.04/24.04 and Debian 12/13 are). It runs because Kali is Debian-based, but the plan puts Splunk on Ubuntu Server so the SIEM and the attack VM stay separate. **[checked]**
-- Register with a personal email, not a work email.
-
-**Evidence still missing:** Settings > Licensing screenshot and a VM snapshot named `splunk-clean`.
-
----
-
-## 3. Splunk Web, apps and add-ons (Lesson 2)
+## 2. Splunk Web, apps and add-ons (Lesson 2)
 
 **Layout.** The Splunk bar holds the app switcher, Messages, Settings, Activity (jobs, triggered alerts) and Help. The home page lists installed apps on the left. Search & Reporting is where you write SPL, set time ranges, inspect fields and save reports, dashboards and alerts. **[course]**
 
@@ -96,7 +43,7 @@ You downloaded Splunk Enterprise 10.6.2.5 (.deb, about 1.5 GB), installed it wit
 
 ---
 
-## 4. Search fundamentals (Lesson 3) and search modes
+## 3. Search fundamentals (Lesson 3) and search modes
 
 ### Terms and Boolean logic
 Combine keywords, quoted phrases and wildcards. **Operator order is NOT, then OR, then AND**, with AND implied between terms. **[course; I did not re-check it in Splunk's docs]**
@@ -162,7 +109,7 @@ Replace the last two lines with `| geostats count` to feed a map panel. `iplocat
 
 ---
 
-## 5. Knowledge objects
+## 4. Knowledge objects
 
 Knowledge objects are **search-time** definitions that classify, normalise, enrich and interpret your data **without changing the raw events at index time**. This is the main reason you can fix a bad extraction later without re-ingesting. **[course]**
 
@@ -187,7 +134,7 @@ Your list omits **saved searches, macros and workflow actions**, which are also 
 
 ---
 
-## 6. Reports, dashboards and drilldown
+## 5. Reports, dashboards and drilldown
 
 ### Reports
 A report is a saved search that runs on demand or on a schedule and can feed a dashboard. To create one: run the search, then Save As > Report, enter a title and optional description, choose whether to include a time range picker, and save. Then pick Continue Editing, Add to Dashboard, Permissions or View. **[course]**
@@ -228,7 +175,7 @@ Drilldown makes a click do something. The four actions: **link to a search** (op
 
 ---
 
-## 7. RBAC: roles and capabilities (corrected)
+## 6. RBAC: roles and capabilities (corrected)
 
 ![RBAC](images/rbac.png)
 
@@ -254,7 +201,7 @@ Drilldown makes a click do something. The four actions: **link to a search** (op
 
 ---
 
-## 8. Glossary
+## 7. Glossary
 
 | Term | Meaning |
 |---|---|
@@ -283,7 +230,7 @@ Drilldown makes a click do something. The four actions: **link to a search** (op
 
 ---
 
-## 9. Hands-on tasks for your lab (map to the plan)
+## 8. Hands-on tasks for your lab 
 
 | Plan day | Task | Proof to save |
 |---|---|---|
@@ -296,37 +243,3 @@ Drilldown makes a click do something. The four actions: **link to a search** (op
 | 18 | THM "Splunk: Exploring SPL" | Five commands and the question each answered |
 
 ---
-
-## 10. Interview practice (scenario style)
-
-1. **A search over All time takes minutes. What do you do?** Set a tight time range, filter with `index` and `sourcetype` first, end with `stats`, and use Fast mode if you already know the fields.
-2. **Why does the same search show different fields in Smart and Verbose?** Smart acts like Fast when a transforming command is present, so it extracts only what the search needs; Verbose discovers everything.
-3. **You search `Failed OR Accepted password`. What does Splunk run?** `(Failed OR Accepted) AND password`, because OR is evaluated before AND.
-4. **A user holds `power` and a restricted analyst role. What indexes can they search?** The most permissive combination, because roles add access; to restrict, remove the broader role or use a search filter.
-5. **Why use a heavy forwarder?** Filter, mask or route before the data leaves the site; the indexer then only indexes.
-6. **You ran `delete` on events. Is the data gone?** No. They are hidden from search; the raw data remains in the buckets.
-7. **Why are knowledge objects search-time?** You can fix extractions later without re-ingesting.
-8. **A saved search "disappeared". Where do you look?** Check the app context and the object's permissions (Owner, App, All apps).
-
----
-
-## 11. Day note template
-
-- **Goal:**
-- **What I did:**
-- **Result and evidence:**
-- **Why it works:**
-- **What broke and how I fixed it:**
-- **Defender angle:**
-- **Link to my job:**
-- **Interview line:**
-
----
-
-## Sources
-
-- Splunk, About configuring role-based user access (role combination, predefined roles)
-- Splunk, Components and the data pipeline (10.6 docs)
-- Splunk, What is in the tutorial data? (Search Tutorial, 10.6)
-- Splunk, Run Splunk Enterprise as a different or non-root user (10.6) and System requirements (10.4)
-- Your Google Docs (nine) and Day 1 write-up
